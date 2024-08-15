@@ -1,0 +1,34 @@
+{
+  "name": "@navetacandra/deepinfra",
+  "private": false,
+  "version": "0.0.1",
+  "description": "DeepInfra API consumer with no APIKEY needed.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/navetacandra/deepinfra.git"
+  },
+  "keywords": [
+    "llm",
+    "deepinfra",
+    "api",
+    "wrapper",
+    "large language model",
+    "deep learning",
+    "machine learning",
+    "artificial intelligence",
+    "ai"
+  ],
+  "author": "navetacandra <naveta.cand@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/navetacandra/deepinfra/issues"
+  },
+  "homepage": "https://github.com/navetacandra/deepinfra#readme",
+  "publishConfig": {
+    "access": "public"
+  }
+}

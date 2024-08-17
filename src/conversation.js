@@ -21,13 +21,13 @@ class Conversation extends EventEmitter {
    * @param {object} opt
    * @param {{role:'system'|'assistant'|'user', content: string}[]} opt.history
    * @param {string} opt.rewritedTo
-   * @param {string} opt.model
    * @param {boolean} opt.stream - default value `false`
    *
    * @returns {Conversation}
    */
-  constructor({ history=[], rewritedTo='', stream=false } = {}) {
+  constructor(opt={}) {
     super();
+    const { history, rewritedTo, stream } = opt;
     /**
      * @type {boolean}
      */
@@ -43,7 +43,7 @@ class Conversation extends EventEmitter {
     /**
      * @type {{role:'system'|'assistant'|'user', content: string}[]}
      */
-    this.history = history;
+    this.history = history ?? [];
     /**
      * @type {string}
      */

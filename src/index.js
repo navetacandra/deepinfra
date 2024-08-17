@@ -24,14 +24,34 @@ class Conversation extends EventEmitter {
    * @param {string} opt.rewritedTo
    * @param {string} opt.model
    * @param {boolean} opt.stream - default value `false`
+   *
+   * @returns {Conversation}
    */
-  constructor({ history=[], model='', rewritedTo='', stream=false }) {
+  constructor({ history=[], rewritedTo='', stream=false } = {}) {
     super();
-    this.stream = stream;
+    /**
+     * @type {boolean}
+     */
+    this.stream = !!stream;
+    /**
+     * @type {{model_name: string, type: string, description: string, cover_img_url: string, max_tokens: number|null, deprecated: boolean|null}[]}
+     */
     this.models = [];
-    this.model = model;
+    /**
+     * @type {string}
+     */
+    this.model;
+    /**
+     * @type {{role:'system'|'assistant'|'user', content: string}[]}
+     */
     this.history = history;
+    /**
+     * @type {string}
+     */
     this.api = !!rewritedTo ? rewritedTo : 'https://api.deepinfra.com';
+    /**
+     * @type {boolean}
+     */
     this.initialized = false;
   }
 
@@ -41,10 +61,6 @@ class Conversation extends EventEmitter {
   async init() {
     try {
       this.models = await this.getModels();
-      if(!this.models.find(f => f.model_name == this.model)) {
-        this.emit('error', new Error('Invalid model name'));
-        return;
-      }
       this.initialized = true;
       this.emit('initialized');
     } catch(err) {
@@ -65,7 +81,15 @@ class Conversation extends EventEmitter {
       mode: "cors",
       credentials: "omit",
     });
-    return JSON.parse(res).filter(f => f.type == 'text-generation')
+    return JSON.parse(res).filter(f => f.type == 'text-generation').map(({model_name, type, description, cover_img_url, max_tokens, deprecated}) => ({ model_name, type, description, cover_img_url, max_tokens, deprecated}));
+  }
+
+  setModel(model='') {
+    if(!this.models.find(f => f.model_name == model)) {
+      this.emit('error', new Error('Model not found'));
+      throw new Error('Model not found');
+    }
+    this.model = model;
   }
 
   /**
@@ -74,10 +98,19 @@ class Conversation extends EventEmitter {
     * @returns {Promise<{role:'assistant', content: string}>}
     */
   async completion(content='') {
+    if(!this.models.find(f => f.model_name == this.model)) {
+      this.emit('error', new Error('Invalid model name'));
+      throw new Error('Invalid model name');
+    }
+
     if(!content || typeof content !== 'string') {
-      if(this.history.slice(-1)[0].role !== 'user') throw new Error('Content should be a string and cannot be empty!');
+      if(this.history.slice(-1)[0].role !== 'user') {
+        this.emit('error', new Error('Content should be a string and cannot be empty!'));
+        throw new Error('Content should be a string and cannot be empty!');
+      }
       return await this.#generate();
     }
+
     this.history.push({ role: 'user', content });
     return await this.#generate();
   }

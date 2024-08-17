@@ -18,7 +18,6 @@ const headers = {
 
 class Conversation extends EventEmitter {
   /**
-   *
    * @param {object} opt
    * @param {{role:'system'|'assistant'|'user', content: string}[]} opt.history
    * @param {string} opt.rewritedTo
@@ -70,6 +69,7 @@ class Conversation extends EventEmitter {
 
   /**
    * Fetch all available models
+   * @returns {Promise<{model_name: string, type: string, description: string, cover_img_url: string, max_tokens: number|null, deprecated: boolean|null}[]>}
    */
   async getModels() {
     if(this.initialized) return this.models;
@@ -85,9 +85,11 @@ class Conversation extends EventEmitter {
   }
 
   setModel(model='') {
+    // Checking is model available and valid
     if(!this.models.find(f => f.model_name == model)) {
-      this.emit('error', new Error('Model not found'));
-      throw new Error('Model not found');
+      const errorMessage = new Error('Model not found');
+      this.emit('error', errorMessage);
+      throw errorMessage;
     }
     this.model = model;
   }
@@ -98,15 +100,20 @@ class Conversation extends EventEmitter {
     * @returns {Promise<{role:'assistant', content: string}>}
     */
   async completion(content='') {
+    // Checking is model available and valid
     if(!this.models.find(f => f.model_name == this.model)) {
-      this.emit('error', new Error('Invalid model name'));
-      throw new Error('Invalid model name');
+      const errorMessage = new Error('Invalid model name');
+      this.emit('error', errorMessage);
+      throw errorMessage;
     }
 
+    // Checking if content is empty
     if(!content || typeof content !== 'string') {
+      // Checking if content is empty and last chat is by user
       if(this.history.slice(-1)[0].role !== 'user') {
-        this.emit('error', new Error('Content should be a string and cannot be empty!'));
-        throw new Error('Content should be a string and cannot be empty!');
+        const errorMessage = new Error('Content should be a string and cannot be empty!');
+        this.emit('error', errorMessage);
+        throw errorMessage;
       }
       return await this.#generate();
     }

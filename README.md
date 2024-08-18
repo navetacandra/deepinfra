@@ -41,7 +41,7 @@ console.log(await conversation.completion('Hello, how are you?'));
 // or stream
 conversation.on('chat', chat => console.log(chat));
 conversation.on('completion', response => process.stdout.write(response));
-conversation.streamCompletion('Hello, how are you?');
+conversation.completion('Hello, how are you?');
 ```
 ### Registered events
 ```js
